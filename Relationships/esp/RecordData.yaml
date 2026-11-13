@@ -1,0 +1,15 @@
+SpriggitSource:
+  PackageName: Spriggit.Yaml.Skyrim
+  Version: 0.40
+ModKey: Mantella Living World - Relationships.esp
+GameRelease: SkyrimSE
+ModHeader:
+  Flags:
+  - Small
+  Author: itsPigeon2000
+  Description: Mantella Living World - Relationships. Marriage (M.A.R.A.S) and shared history (Lover's Ledger) for Mantella.
+  MasterReferences:
+  - Master: Skyrim.esm
+    FileSize: 0
+  - Master: Update.esm
+    FileSize: 0

@@ -1,0 +1,13 @@
+# build output
+build/*
+!build/stubs/
+out/
+test/build/
+test/out/
+*.esp
+.snapshots/
+__pycache__/
+docs/
+
+# compiled by tools/build.py in the Hub repo
+Scripts/*.pex

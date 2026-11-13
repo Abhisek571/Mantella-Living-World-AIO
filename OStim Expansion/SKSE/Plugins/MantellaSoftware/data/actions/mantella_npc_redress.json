@@ -1,0 +1,36 @@
+{
+    "_dependencies": [
+        "MAE_Npc.psc",
+        "src.actions.function_manager.FunctionManager"
+    ],
+    "identifier": "mantella_mlw_redress",
+    "name": "Redress",
+    "description": "The named NPCs put back on what they took off.",
+    "note": "Replaces the Mantella Community Resources - ostim action of the same name. Offered only to NPCs close to you (decided by the Hub). Handled by this module: each named NPC must be in the conversation and close to you. Puts back on what the Undress action took off.",
+    "key": "Redress",
+    "enabled": true,
+    "lw_gate": "close",
+    "parameters": {
+        "source": {
+            "type": "array",
+            "description": "Each NPC in this conversation who gets dressed again.",
+            "items": {
+                "type": "string"
+            },
+            "scope": "conversation"
+        }
+    },
+    "required": [
+        "source"
+    ],
+    "prompt": "ANIMATION TRIGGER: the named NPCs put back on the clothes and armor they took off. Use it when the speaking NPC wants to get dressed again, or when the player asks them to. An event line or another NPC's wish is not enough. Never name a child.\n\nIf it applies, begin your response with '{key}:'.",
+    "allowed_games": [
+        "skyrim"
+    ],
+    "requires_response": false,
+    "is-interrupting": false,
+    "allow_repeat": true,
+    "one-on-one": true,
+    "multi-npc": true,
+    "radiant": false
+}

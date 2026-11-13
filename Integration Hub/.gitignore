@@ -1,0 +1,15 @@
+# build output
+build/*
+!build/stubs/
+out/
+test/build/
+test/out/
+*.esp
+.snapshots/
+__pycache__/
+docs/
+dist/
+server/living_world/settings.json
+tools/local-paths.json
+server/living_world/profile_overrides.json
+/StorageUtilData/

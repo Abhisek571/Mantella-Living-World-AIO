@@ -1,0 +1,592 @@
+{
+  "modName": "Mantella Living World - Integration Hub",
+  "displayName": "Mantella Living World",
+  "minMcmVersion": 9,
+  "cursorFillMode": "topToBottom",
+  "content": [
+    {
+      "text": "Pick a page on the left",
+      "type": "header"
+    }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "Overview",
+      "content": [
+        {
+          "text": "Where the other settings are",
+          "type": "header"
+        },
+        {
+          "text": "Mantella's UI, Living World tabs",
+          "type": "text",
+          "help": "Module map, token use, NPC and player overrides, memories, prompt rules and module settings."
+        },
+        {
+          "text": "OStim's MCM, page Living World",
+          "type": "text",
+          "help": "Needs OStim Expansion: the Yes/No box before a scene, scene flows and scene talk."
+        },
+        {
+          "text": "Quiet outfits",
+          "type": "header"
+        },
+        {
+          "text": "During scenes",
+          "type": "toggle",
+          "help": "OStim Expansion and Followers ask the hub to hide Mantella's equip and unequip lines while a scene undresses and redresses everyone. Does nothing without one of them.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|808"
+          }
+        },
+        {
+          "text": "After loading screens",
+          "type": "toggle",
+          "help": "Hide Mantella's equip and unequip lines right after a loading screen, when outfits are put back on.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|800"
+          }
+        },
+        {
+          "text": "Quiet for (seconds)",
+          "type": "slider",
+          "help": "How long the quiet lasts after a loading screen or a scene.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|801",
+            "min": 0,
+            "max": 30,
+            "step": 1,
+            "formatString": "{0} s"
+          }
+        },
+        {
+          "text": "NPC temperament",
+          "type": "header"
+        },
+        {
+          "text": "Default temperament",
+          "type": "enum",
+          "help": "For NPCs without their own setting. Only has an effect with the Arousal module. Set one NPC: aim at them and press the hotkey.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|802",
+            "options": [
+              "Auto",
+              "Reserved",
+              "Bold",
+              "Forward"
+            ]
+          }
+        },
+        {
+          "text": "Auto judges lust from",
+          "type": "enum",
+          "help": "Mantella's appetite rating (OSL values until rated), or OSL Aroused values only. Only has an effect with the Arousal module; the appetite rating needs Mantella's Advanced Actions on.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|803",
+            "options": [
+              "Appetite rating",
+              "OSL values only"
+            ]
+          }
+        },
+        {
+          "text": "Never force-start a scene",
+          "type": "toggle",
+          "help": "NPCs at peak arousal beg but never start a scene without the player's yes. Only has an effect with the Arousal module.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|804"
+          }
+        },
+        {
+          "text": "Living World hotkey",
+          "type": "keymap",
+          "help": "Aim at an NPC: set their temperament or allow intimacy with them. Aim at nobody: run the setup (default temperament, only matters with the Arousal module). Temperament needs the Arousal module.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|805"
+          }
+        },
+        {
+          "text": "Setup power in magic menu",
+          "type": "toggle",
+          "help": "The Living World Setup power does what the hotkey does: cast it aiming at an NPC or at nobody. For controllers or a hotkey clash.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|80B"
+          }
+        },
+        {
+          "text": "Setup reminder",
+          "type": "toggle",
+          "help": "Remind after loading while the setup has not been run. The setup only matters with the Arousal module.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|806"
+          }
+        },
+        {
+          "type": "hiddenToggle",
+          "groupControl": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "Never"
+          }
+        },
+        {
+          "text": "Installed modules",
+          "type": "header",
+          "position": 1
+        },
+        {
+          "text": "Integration Hub",
+          "type": "toggle",
+          "help": "The shared base. Every module needs it.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasHub"
+          }
+        },
+        {
+          "text": "OStim Expansion",
+          "type": "toggle",
+          "help": "Scene flows, scene talk and bystanders. Needs OStim Standalone.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasOStimExpansion"
+          }
+        },
+        {
+          "text": "Arousal module",
+          "type": "toggle",
+          "help": "Arousal, appetite, satisfied and overwhelmed. Needs OSL Aroused.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasArousal"
+          }
+        },
+        {
+          "text": "Relationships",
+          "type": "toggle",
+          "help": "Marriage and shared history. Needs M.A.R.A.S or Lover's Ledger.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasRelationships"
+          }
+        },
+        {
+          "text": "Followers module",
+          "type": "toggle",
+          "help": "Join, leave, wait, follow, passive, wear this. Needs Nether's Follower Framework.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasFollowers"
+          }
+        },
+        {
+          "text": "World",
+          "type": "toggle",
+          "help": "Fame, crime, quest outcomes, who knows whom, banter, NPCs who come to talk.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasWorld"
+          }
+        },
+        {
+          "text": "Works with",
+          "type": "header"
+        },
+        {
+          "text": "Mantella",
+          "type": "toggle",
+          "help": "Required by everything. Turn on Advanced Actions in the Actions tab of Mantella's settings.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasMantella"
+          }
+        },
+        {
+          "text": "OStim Standalone",
+          "type": "toggle",
+          "help": "Used by OStim Expansion.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasOStim"
+          }
+        },
+        {
+          "text": "OSL Aroused",
+          "type": "toggle",
+          "help": "Used by Arousal.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasOSL"
+          }
+        },
+        {
+          "text": "M.A.R.A.S",
+          "type": "toggle",
+          "help": "Used by Relationships and Arousal.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasMARAS"
+          }
+        },
+        {
+          "text": "Lover's Ledger",
+          "type": "toggle",
+          "help": "Used by Relationships.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasLedger"
+          }
+        },
+        {
+          "text": "Relations Finder",
+          "type": "toggle",
+          "help": "Used by Relationships for each NPC's family and ties.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasRelationsFinder"
+          }
+        },
+        {
+          "text": "Nether's Follower Framework",
+          "type": "toggle",
+          "help": "Used by Followers.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasNFF"
+          }
+        }
+      ],
+      "cursorFillMode": "topToBottom"
+    },
+    {
+      "pageDisplayName": "World",
+      "content": [
+        {
+          "text": "Needs Mantella Living World - World",
+          "type": "text",
+          "help": "These settings do nothing without Mantella Living World - World.esp. Banter is between party members only."
+        },
+        {
+          "text": "Party talk",
+          "type": "header"
+        },
+        {
+          "text": "Party banter",
+          "type": "toggle",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - World.esp|810"
+          },
+          "help": "A party member may react to a line said nearby, to walking into an inn or to the end of a fight."
+        },
+        {
+          "text": "Chance to react",
+          "type": "slider",
+          "help": "How often a party member reacts when banter could start.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - World.esp|811",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "formatString": "{0}%"
+          }
+        },
+        {
+          "text": "NPCs who come to talk",
+          "type": "header"
+        },
+        {
+          "text": "Come over to talk",
+          "type": "toggle",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - World.esp|812"
+          },
+          "help": "An NPC with something to tell you (a promise, a job, news) walks up and starts a talk."
+        },
+        {
+          "text": "Pacing",
+          "type": "header"
+        },
+        {
+          "text": "Ambient lines per hour",
+          "type": "slider",
+          "help": "Most banter and walk-up talks per real hour, all together.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|80A",
+            "min": 1,
+            "max": 20,
+            "step": 1,
+            "formatString": "{0}"
+          }
+        },
+        {
+          "text": "Reset pacing",
+          "type": "text",
+          "help": "Forget the cooldowns and the count for this hour.",
+          "valueOptions": {
+            "value": "Click"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "ResetPace"
+          }
+        }
+      ],
+      "cursorFillMode": "topToBottom"
+    },
+    {
+      "pageDisplayName": "Debug menu",
+      "cursorFillMode": "topToBottom",
+      "content": [
+        {
+          "type": "toggle",
+          "text": "Enable debug menu",
+          "groupControl": 7,
+          "help": "On by default. Changes made here are real changes to your save; switch it off to hide these tools.",
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "CheatsOn"
+          }
+        },
+        {
+          "type": "hiddenToggle",
+          "groupControl": 8,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasRelationships"
+          }
+        },
+        {
+          "type": "hiddenToggle",
+          "groupControl": 9,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasMARAS"
+          }
+        },
+        {
+          "type": "hiddenToggle",
+          "groupControl": 10,
+          "valueOptions": {
+            "sourceType": "PropertyValueBool",
+            "propertyName": "HasArousal"
+          }
+        },
+        {
+          "type": "header",
+          "text": "Target",
+          "groupCondition": 7
+        },
+        {
+          "type": "text",
+          "text": "Who the debug menu acts on",
+          "groupCondition": 7,
+          "help": "The NPC under your crosshair when you opened this menu, else the last NPC you talked to.",
+          "valueOptions": {
+            "value": "Show"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "ShowTarget"
+          }
+        },
+        {
+          "type": "text",
+          "text": "What they can do now",
+          "groupCondition": 7,
+          "help": "Which gated actions this NPC gets right now, and why.",
+          "valueOptions": {
+            "value": "Show"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "ShowCanDo"
+          }
+        },
+        {
+          "type": "header",
+          "text": "Debug tools",
+          "groupCondition": 7
+        },
+        {
+          "type": "enum",
+          "text": "Relationship",
+          "groupCondition": 7,
+          "help": "Stranger, Friend (rank 1), Lover (rank 4) or Follower (rank 1 and teammate). Friend or better opens the close actions; Lover also opens the intimate ones. Follower sets the teammate flag only (for testing follower actions): they will not walk with you unless a follower framework takes them.",
+          "valueOptions": {
+            "options": [
+              "Stranger",
+              "Friend",
+              "Lover",
+              "Follower"
+            ],
+            "sourceType": "PropertyValueInt",
+            "propertyName": "RelChoice"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetRelationship",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "enum",
+          "text": "M.A.R.A.S status",
+          "groupCondition": {
+            "AND": [
+              7,
+              8,
+              9
+            ]
+          },
+          "help": "Needs Relationships and M.A.R.A.S. A status change is not undone by Reset.",
+          "valueOptions": {
+            "options": [
+              "Candidate",
+              "Engaged",
+              "Married"
+            ],
+            "sourceType": "PropertyValueInt",
+            "propertyName": "MarasChoice"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetMaras",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "text": "M.A.R.A.S affection",
+          "groupCondition": {
+            "AND": [
+              7,
+              8,
+              9
+            ]
+          },
+          "help": "Needs Relationships and M.A.R.A.S. For a spouse or fiance the lowest value is 25: below it M.A.R.A.S starts its divorce crisis and moves the spouse out, which Reset cannot undo. Refused while a crisis is running.",
+          "valueOptions": {
+            "min": 25,
+            "max": 100,
+            "step": 5,
+            "formatString": "{0}",
+            "sourceType": "PropertyValueFloat",
+            "propertyName": "MarasAffection"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetMarasAffection",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "text": "Arousal",
+          "groupCondition": {
+            "AND": [
+              7,
+              10
+            ]
+          },
+          "help": "Needs the Arousal module and OSL Aroused.",
+          "valueOptions": {
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "formatString": "{0}",
+            "sourceType": "PropertyValueFloat",
+            "propertyName": "ArousalValue"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetArousal",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "header",
+          "text": "Undo",
+          "groupCondition": 7
+        },
+        {
+          "type": "text",
+          "text": "Reset target",
+          "groupCondition": 7,
+          "help": "Puts back what this menu changed on this NPC (not a M.A.R.A.S status). A part the game changed since (a marriage, a hire, earned affection) is left as it is.",
+          "valueOptions": {
+            "value": "Click"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "ResetTarget"
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Troubleshooting",
+      "content": [
+        {
+          "text": "Bug reports",
+          "type": "header"
+        },
+        {
+          "text": "Write report",
+          "type": "text",
+          "help": "Writes SKSE\\Plugins\\MantellaLivingWorld\\report.txt (with MO2: the overwrite folder): versions, installed modules and mods, settings, quiet state, the Mantella conversation and the last debug lines. Attach it with Mantella's logging.log.",
+          "valueOptions": {
+            "value": "Click"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "WriteReport"
+          }
+        },
+        {
+          "text": "Debug log",
+          "type": "toggle",
+          "help": "Modules write what they do to SKSE\\Plugins\\MantellaLivingWorld\\debug.log. Turn on while reproducing a problem, then write a report.",
+          "valueOptions": {
+            "sourceType": "GlobalValue",
+            "sourceForm": "Mantella Living World - Integration Hub.esp|809"
+          }
+        }
+      ],
+      "cursorFillMode": "topToBottom"
+    }
+  ]
+}
