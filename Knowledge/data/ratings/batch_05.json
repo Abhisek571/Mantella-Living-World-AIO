@@ -1,0 +1,59 @@
+{
+ "Alain Dufont|Breton|01B074": {
+  "note": "leads the bandits in Raldbthar; was a bandit only through BanditFriendFaction before",
+  "profession": "bandit"
+ },
+ "Ancano|Altmer|01E7D7": {
+  "profession": "mage"
+ },
+ "Arngeir|Nord|02C6C7": {
+  "hold": "Whiterun Hold"
+ },
+ "Aventus Aretino|Nord|014132": {
+  "add_ties": [
+   {
+    "inside": true,
+    "level": 5,
+    "place": "Honorhall Orphanage"
+   }
+  ],
+  "note": "grew up in Honorhall and ran away from it"
+ },
+ "Belethor|Breton|013BA1": {
+  "profession": "merchant"
+ },
+ "Emperor Titus Mede II|Imperial|01D4B9": {
+  "profession": "noble"
+ },
+ "Emperor Titus Mede II|Imperial|01D4BA": {
+  "profession": "noble"
+ },
+ "Erandur|Dunmer|02427D": {
+  "add_ties": [
+   {
+    "inside": true,
+    "level": 5,
+    "place": "Nightcaller Temple"
+   }
+  ],
+  "note": "was a priest of Vaermina in the temple before the Miasma"
+ },
+ "Faendal|Bosmer|013480": {
+  "origin_province": "Valenwood"
+ },
+ "Gulum-Ei|Argonian|013284": {
+  "profession": "thief"
+ },
+ "Linwe|Altmer|07D679": {
+  "profession": "thief"
+ },
+ "Maven Black-Briar|Nord|01336A": {
+  "profession": "noble"
+ },
+ "Moth gro-Bagol|Orsimer|055A5E": {
+  "standing": "common"
+ },
+ "Sibbi Black-Briar|Nord|01337B": {
+  "profession": "noble"
+ }
+}

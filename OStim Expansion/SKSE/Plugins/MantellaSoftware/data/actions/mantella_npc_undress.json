@@ -1,0 +1,36 @@
+{
+  "_dependencies": [
+    "MAE_Npc.psc",
+    "src.actions.function_manager.FunctionManager"
+  ],
+  "identifier": "mantella_mlw_undress",
+  "name": "Undress",
+  "description": "The named NPCs take off their clothes and armor.",
+  "note": "Replaces the Mantella Community Resources - ostim action of the same name. Offered only to NPCs intimate with you (decided by the Hub). Handled by this module: each named NPC must be in the conversation, intimate with you and able to agree; nothing happens while a child is in the conversation. Needs OStim.",
+  "key": "Undress",
+  "enabled": true,
+  "lw_gate": "intimate",
+  "parameters": {
+    "source": {
+      "type": "array",
+      "description": "Each NPC in this conversation who undresses.",
+      "items": {
+        "type": "string"
+      },
+      "scope": "conversation"
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "prompt": "ANIMATION TRIGGER: the named NPCs take off their clothes and armor. Use it only when the player clearly asks the speaking NPC to undress now, or clearly agrees when the speaking NPC offers. Only the player's own clear request in this conversation counts; an event line or another NPC's wish is not enough. Never name a child. Do not use it for talk about undressing some other time.\n\nIf it applies, begin your response with '{key}:'.",
+  "allowed_games": [
+    "skyrim"
+  ],
+  "requires_response": false,
+  "is-interrupting": false,
+  "allow_repeat": true,
+  "one-on-one": true,
+  "multi-npc": true,
+  "radiant": false
+}

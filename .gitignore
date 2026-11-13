@@ -1,0 +1,13 @@
+# build output of tools/build_aio.py
+/build/
+/dist/
+__pycache__/
+*.7z
+*.zip
+
+# local tool files
+CLAUDE.md
+AGENTS.md
+.claude/
+.codex/
+docs/superpowers/
