@@ -258,11 +258,12 @@ UPDATE_COLOR = COLORS['update']  # updates are news, not a problem: their own co
 
 
 def update_lines(updates: dict | None, found: dict[str, tuple[str, str]]) -> list[tuple[str, str]]:
-    """(module, text) for each installed module with a newer version on Nexus, in map order."""
+    """(module, text) for each installed module with a newer version on Nexus, in map order. A name that is not a box on
+    the map (the All in One download's own version file) is always listed: its file is only there when it is installed."""
     order = ['Integration Hub'] + MAP_ROW
     return [(name, f"Update {u['latest']} is on Nexus (you have {u['installed']})")
             for name, u in sorted((updates or {}).items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else 99)
-            if found.get(name, ('off',))[0] != 'off']
+            if name not in found or found[name][0] != 'off']
 
 
 def start_here_html(actions_dir: str, extensions_dir: str, values: dict, data_dir: str | None = None,
@@ -276,7 +277,7 @@ def start_here_html(actions_dir: str, extensions_dir: str, values: dict, data_di
     # a working module with a newer version is drawn in the update colour; a problem keeps its own colour (more urgent)
     shown = dict(found)
     for name, _ in news:
-        if shown[name][0] == 'ok':  # the part before the colon fits in the box, the rest is in the hover
+        if name in shown and shown[name][0] == 'ok':  # the part before the colon fits in the box, the rest is in the hover
             u = updates[name]
             shown[name] = ('update', f"Update {u['latest']} on Nexus: you have {u['installed']}")
     game = ('ok', 'Game data found') if os.path.isdir(data_dir) else \

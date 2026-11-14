@@ -8,7 +8,7 @@ This repository holds the source of every Living World mod in one place and repl
 
 | Folder | What it adds | Version |
 |---|---|---|
-| [Integration Hub](Integration%20Hub/) | The base every module needs: the Living World tab in Mantella's settings page, memory, action gates and the debug menu | 1.2.1 |
+| [Integration Hub](Integration%20Hub/) | The base every module needs: the Living World tab in Mantella's settings page, memory, action gates and the debug menu | 1.2.2 |
 | [Direct AI Connect](Direct%20AI%20Connect/) | The patched Mantella.exe that Living World runs inside, with more LLM services and Dual Input built in | 1.4.0 |
 | [Relationships](Relationships/) | Marriage, affection, family ties and shared history | 1.2.0 |
 | [World](World/) | What NPCs know about you: fame, bounty, titles, quest outcomes, what you did to them, recognition, party banter | 1.2.0 |
