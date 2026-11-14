@@ -6,7 +6,7 @@ one .7z into dist/. Nothing is rebuilt from source here: the AIO carries exactly
 
 usage: py -3 tools/build_aio.py [--version 1.0.0] [--keep]
 """
-import argparse, glob, os, re, shutil, subprocess, sys
+import argparse, glob, json, os, re, shutil, subprocess, sys
 from xml.sax.saxutils import escape
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -76,6 +76,28 @@ def stage_dac(dest):
         p = os.path.join(dest, name)
         if os.path.isfile(p):
             os.remove(p)
+
+
+AIO_NEXUS_ID = 198897  # the All in One page: the only page the Hub's update check asks about
+VERSIONS = os.path.join('SKSE', 'Plugins', 'MantellaSoftware', 'data', 'living_world', 'versions')
+
+
+def point_updates_here(stage, version):
+    """Each module keeps its own version file (its real version shows in the Hub's report) but with Nexus id 0, so the
+    update check skips the separate pages; the Hub folder, always installed, gets the All in One's own version file."""
+    for key, folder, *_ in MODULES:
+        vdir = os.path.join(stage, folder, VERSIONS)
+        for name in os.listdir(vdir) if os.path.isdir(vdir) else []:
+            path = os.path.join(vdir, name)
+            with open(path, encoding='utf-8-sig') as f:
+                data = json.load(f)
+            data['nexus_id'] = 0
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+    hub = os.path.join(stage, MODULES[0][1], VERSIONS)
+    os.makedirs(hub, exist_ok=True)
+    with open(os.path.join(hub, 'aio.json'), 'w', encoding='utf-8') as f:
+        json.dump({'module': 'All in One', 'version': version, 'nexus_id': AIO_NEXUS_ID}, f, indent=2)
 
 
 def check_no_overlap(stage):
@@ -171,6 +193,7 @@ def main():
         if key == 'dac':
             stage_dac(dest)
         used.append((folder, os.path.basename(archive)))
+    point_updates_here(STAGE, args.version)
     files = check_no_overlap(STAGE)
 
     readme_folder = 'Docs AIO'

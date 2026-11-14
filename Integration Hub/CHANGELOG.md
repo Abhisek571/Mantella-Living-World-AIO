@@ -2,6 +2,11 @@
 
 Every change to Mantella Living World - Integration Hub. The Nexus page lists only the main changes for each version.
 
+## 1.2.2 (2026-11-14)
+
+### New
+- The All in One download has its own update check: Status shows one line when a newer All in One is on Nexus.
+
 ## 1.2.1 (2026-11-09)
 
 ### New
