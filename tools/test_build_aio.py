@@ -54,6 +54,10 @@ with tempfile.TemporaryDirectory() as tmp:
     put(staged, 'Scripts/Source/B.psc', b'Scriptname B\n')
     os.remove(os.path.join(staged, 'SKSE/Plugins/MantellaSoftware/data/prompt_rules/99_old.txt'))
     put(staged, 'SKSE/Plugins/X.dll', b'MZ new')
+    put(repo, 'SKSE/Plugins/MantellaSoftware/data/actions/new_action.json', b'{}')  # a data file added after the release
+    check('a data file the archive lacks is stale', dict(B.stale_files('knowledge', staged, repo)).get(
+        'SKSE/Plugins/MantellaSoftware/data/actions/new_action.json') == 'in the source, not in the archive')
+    put(staged, 'SKSE/Plugins/MantellaSoftware/data/actions/new_action.json', b'{}')
     check('a release built from the current source: nothing reported', B.stale_files('knowledge', staged, repo) == [],
           B.stale_files('knowledge', staged, repo))
 
