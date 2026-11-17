@@ -122,8 +122,8 @@ def source_of(key, rel):
 
 
 def stale_files(key, staged, repo):
-    """Files of an unpacked release archive that differ from the current source, plus scripts and server code the
-    source has and the archive lacks. [(path, why)]."""
+    """Files of an unpacked release archive that differ from the current source, plus scripts, server code and data
+    files (the SKSE and MCM folders the build copies whole) the source has and the archive lacks. [(path, why)]."""
     out, seen = [], set()
     for rel in _rel_files(staged):
         src = source_of(key, rel)
@@ -145,11 +145,13 @@ def stale_files(key, staged, repo):
         wanted = ['Source/Scripts'] + ([f'server/{d}' for d in sorted(os.listdir(server))
                                         if os.path.isdir(os.path.join(server, d)) and d != 'tests' and d not in SKIP_PARTS]
                                        if os.path.isdir(server) else [])
-    for folder in wanted:
+    data = [] if key == 'dac' else [d for d in ('SKSE', 'MCM') if os.path.isdir(os.path.join(repo, d))]
+    for folder in wanted + data:
         base = os.path.join(repo, folder)
         for rel in _rel_files(base) if os.path.isdir(base) else []:
             src = f'{folder}/{rel}'
-            if src.endswith(('.psc', '.py')) and src not in seen and os.path.basename(src) not in BUILD_IGNORED:
+            wanted_type = folder in data or src.endswith(('.psc', '.py'))
+            if wanted_type and src not in seen and os.path.basename(src) not in BUILD_IGNORED:
                 out.append((src, 'in the source, not in the archive'))
     return out
 
