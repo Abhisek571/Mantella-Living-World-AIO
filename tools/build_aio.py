@@ -3,8 +3,10 @@
 Takes the newest release archives that already exist (the Integration Hub's dist folder for the Living World modules,
 Direct AI Connect's release folder for the patched Mantella.exe), lays each one out as its own FOMOD option and packs
 one .7z into dist/. Nothing is rebuilt from source here: the AIO carries exactly the files of the separate releases.
+It stops when a release archive does not match its module's current source (--allow-stale packs it anyway), and warns
+when a source mirror folder in this repository is out of date.
 
-usage: py -3 tools/build_aio.py [--version 1.0.0] [--keep]
+usage: py -3 tools/build_aio.py [--version 1.0.0] [--keep] [--allow-stale]
 """
 import argparse, glob, json, os, re, shutil, subprocess, sys
 from xml.sax.saxutils import escape
@@ -23,7 +25,7 @@ MODULES = [
     ('hub', '00 Integration Hub', 'Mantella Living World - Integration Hub', 'Integration Hub',
      'The base every module needs: the Living World tab in Mantella\'s settings page, memory, action gates and the debug menu. Always installed.', None),
     ('dac', '01 Direct AI Connect', 'Mantella - Direct AI Connect', 'Mantella - Direct AI Connect',
-     'The patched Mantella.exe that Living World runs inside. Needed for everything in Living World. Untick it only if you already have Direct AI Connect installed as its own mod. After installing, run Setup Backend.cmd in this mod\'s folder once (needs Python 3.11 once).', None),
+     'The patched Mantella.exe that Living World runs inside. Needed for everything in Living World. Untick it only if you already have Direct AI Connect installed as its own mod. After installing, run Setup Backend.cmd in this mod\'s folder once (needs Python 3.11 once). With OStim Expansion it builds the OStim flows too.', None),
     ('relationships', '10 Relationships', 'Mantella Living World - Relationships', 'Relationships',
      'Marriage, affection, family ties and shared history, from M.A.R.A.S, Relations Finder and Lover\'s Ledger when they are installed.', None),
     ('world', '11 World', 'Mantella Living World - World', 'World',
@@ -39,7 +41,7 @@ MODULES = [
     ('arousal', '16 Arousal', 'Mantella Living World - Arousal', 'Arousal (adult)',
      'Arousal, appetite and temperament from OSL Aroused. Needs OSL Aroused and powerofthree\'s Papyrus Extender.', 'OSLAroused.esp'),
     ('ostim', '17 OStim Expansion', 'Mantella Living World - OStim Expansion', 'OStim Expansion (adult)',
-     'OStim scenes and affection (dances, kisses, hugs) run by conversation. Needs OStim Standalone, OSL Aroused and Actions For Mantella - Expanded Sex Actions. After installing, run Build Flows.cmd once (see the readme).', 'OStim.esp'),
+     'OStim scenes and affection (dances, kisses, hugs) run by conversation. Needs OStim Standalone, OSL Aroused and Actions For Mantella - Expanded Sex Actions. Setup Backend.cmd builds its flows; run Build Flows.cmd only after adding or removing animation packs (see the readme).', 'OStim.esp'),
 ]
 ALWAYS_ON = {'hub'}
 DEFAULT_ON = {'dac', 'relationships', 'world', 'knowledge', 'survival'}
@@ -58,6 +60,118 @@ def newest(folder, prefix, ext):
     if not found:
         raise SystemExit(f'No release archive for {prefix} in {folder}')
     return max(found, key=version_key)
+
+
+# Every bundled module must match its current source. The release archive found is what ships: one older than the source
+# stops the build (--allow-stale builds anyway). The source mirror folders in this repository are what GitHub shows:
+# a difference is a loud warning, since nothing of them is packed.
+REPOS = {'hub': 'Mantella-Living-World-Hub', 'dac': 'Mantella-Direct-AI-Connect',
+         'relationships': 'Mantella-Living-World-Relationships', 'world': 'Mantella-Living-World-World',
+         'knowledge': 'Mantella-Living-World-Knowledge', 'survival': 'Mantella-Living-World-Survival',
+         'followers': 'Mantella-Living-World-Followers', 'missives': 'Mantella-Living-World-Missives',
+         'arousal': 'Mantella-Living-World-Arousal', 'ostim': 'Mantella-Living-World-OStim-Expansion'}
+MIRRORS = {'hub': 'Integration Hub', 'dac': 'Direct AI Connect', 'relationships': 'Relationships', 'world': 'World',
+           'knowledge': 'Knowledge', 'survival': 'Survival', 'followers': 'Followers', 'missives': 'Missives',
+           'arousal': 'Arousal', 'ostim': 'OStim Expansion'}
+# Where the Hub's tools/build.py takes an archive file from: extensions/<name>/ <- server/<name>/, and an extension's
+# data folder (Knowledge: extensions/lw_knowledge/data/ <- data/)
+EXTENSION_DATA = {'lw_knowledge': 'data'}
+EXT = 'SKSE/Plugins/MantellaSoftware/extensions/'
+GENERATED = ('SKSE/Plugins/MantellaSoftware/data/living_world/versions/',)
+SKIP_PARTS = {'__pycache__'}
+BUILD_IGNORED = ('settings.json', 'update_check.json', 'profile_overrides.json')
+
+
+def _rel_files(root):
+    for dirpath, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in SKIP_PARTS]
+        for f in files:
+            yield os.path.relpath(os.path.join(dirpath, f), root).replace('\\', '/')
+
+
+def _same(a, b):
+    """Same content; text compared without line-ending differences (git may check files out with CRLF)."""
+    with open(a, 'rb') as fa, open(b, 'rb') as fb:
+        x, y = fa.read(), fb.read()
+    if x == y:
+        return True
+    return x.replace(b'\r\n', b'\n') == y.replace(b'\r\n', b'\n')
+
+
+def source_of(key, rel):
+    """The repository file an archive file was built from (relative path), or None for built or generated files
+    (.pex, .esp, the version file, Docs)."""
+    if rel.startswith(GENERATED) or rel.endswith(('.pex', '.esp', '.pyc')):
+        return None
+    if key == 'dac':
+        return None if rel.startswith('Docs/') or rel == 'meta.ini' else rel
+    if rel.startswith('Scripts/Source/') and rel.endswith('.psc'):
+        return 'Source/Scripts/' + rel[len('Scripts/Source/'):]
+    if rel.startswith(EXT):
+        name, _, rest = rel[len(EXT):].partition('/')
+        if name in EXTENSION_DATA and rest.startswith('data/'):
+            return EXTENSION_DATA[name] + '/' + rest[len('data/'):]
+        return f'server/{name}/{rest}'
+    if re.fullmatch(r'SKSE/Plugins/[^/]+\.dll', rel):
+        return 'plugin/build/release/' + rel.rsplit('/', 1)[1]
+    if rel.startswith('SKSE/'):
+        return rel
+    if rel.startswith('tools/'):
+        return 'tools/' + rel.rsplit('/', 1)[1]
+    return None
+
+
+def stale_files(key, staged, repo):
+    """Files of an unpacked release archive that differ from the current source, plus scripts and server code the
+    source has and the archive lacks. [(path, why)]."""
+    out, seen = [], set()
+    for rel in _rel_files(staged):
+        src = source_of(key, rel)
+        if src is None:
+            continue
+        extra = src.replace('Source/Scripts/', 'Source/Scripts2x/', 1)  # Relationships' own extra compile step
+        if src.startswith('Source/Scripts/') and not os.path.isfile(os.path.join(repo, src)) and os.path.isfile(os.path.join(repo, extra)):
+            src = extra
+        seen.add(src)
+        path = os.path.join(repo, src)
+        if not os.path.isfile(path):
+            out.append((rel, 'not in the source any more'))
+        elif not _same(os.path.join(staged, rel), path):
+            out.append((rel, 'differs from the source'))
+    if key == 'dac':
+        wanted = ['Scripts/Source', 'Source/backend/src']
+    else:
+        server = os.path.join(repo, 'server')
+        wanted = ['Source/Scripts'] + ([f'server/{d}' for d in sorted(os.listdir(server))
+                                        if os.path.isdir(os.path.join(server, d)) and d != 'tests' and d not in SKIP_PARTS]
+                                       if os.path.isdir(server) else [])
+    for folder in wanted:
+        base = os.path.join(repo, folder)
+        for rel in _rel_files(base) if os.path.isdir(base) else []:
+            src = f'{folder}/{rel}'
+            if src.endswith(('.psc', '.py')) and src not in seen and os.path.basename(src) not in BUILD_IGNORED:
+                out.append((src, 'in the source, not in the archive'))
+    return out
+
+
+def mirror_differences(mirror, repo):
+    """Files of this repository's source mirror that differ from the module repository, or that it no longer has."""
+    out = []
+    for rel in _rel_files(mirror):
+        path = os.path.join(repo, rel)
+        if not os.path.isfile(path):
+            out.append((rel, 'not in the module repository'))
+        elif not _same(os.path.join(mirror, rel), path):
+            out.append((rel, 'differs'))
+    return out
+
+
+def report(title, rows, limit=10):
+    print(title)
+    for rel, why in rows[:limit]:
+        print(f'    {rel}: {why}')
+    if len(rows) > limit:
+        print(f'    ... and {len(rows) - limit} more')
 
 
 def unpack(archive, dest):
@@ -181,18 +295,36 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--version', default='1.0.0')
     ap.add_argument('--keep', action='store_true', help='keep the staging folder')
+    ap.add_argument('--allow-stale', action='store_true', help='build even when a release archive is older than its source')
     args = ap.parse_args()
 
     shutil.rmtree(STAGE, ignore_errors=True)
     os.makedirs(STAGE)
-    used = []
+    used, stale = [], []
     for key, folder, prefix, *_ in MODULES:
         archive = newest(DAC_RELEASE, prefix, 'zip') if key == 'dac' else newest(HUB_DIST, prefix, '7z')
         dest = os.path.join(STAGE, folder)
         unpack(archive, dest)
+        repo = os.path.join(CODING, REPOS[key])
+        rows = stale_files(key, dest, repo) if os.path.isdir(repo) else [(repo, 'module repository not found')]
+        if rows:
+            stale.append(key)
+            report(f'STALE: {os.path.basename(archive)} does not match {REPOS[key]} ({len(rows)} files)', rows)
+        mirror = os.path.join(HERE, MIRRORS[key])
+        if os.path.isdir(mirror) and os.path.isdir(repo):
+            diff = mirror_differences(mirror, repo)
+            if diff:
+                report(f'WARNING: the source mirror {MIRRORS[key]}/ in this repository is out of date with {REPOS[key]} '
+                       f'({len(diff)} files; not packed, but GitHub shows it)', diff, limit=5)
         if key == 'dac':
             stage_dac(dest)
         used.append((folder, os.path.basename(archive)))
+    if stale and not args.allow_stale:
+        shutil.rmtree(STAGE, ignore_errors=True)
+        raise SystemExit(f'Stopped: the release archives of {", ".join(stale)} do not match their source. Build and '
+                         'release those modules again, or pass --allow-stale to pack them as they are.')
+    if stale:
+        print(f'WARNING: packing archives that do not match their source, on purpose (--allow-stale): {", ".join(stale)}')
     point_updates_here(STAGE, args.version)
     files = check_no_overlap(STAGE)
 
