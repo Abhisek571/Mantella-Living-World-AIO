@@ -135,6 +135,10 @@ def build(base, output, root=ROOT, write_contract=False):
     contract = json.loads((root / 'Source/backend/build-contract.json').read_text(encoding='utf-8'))
     raw = base.read_bytes()
     base_hash = sha256(raw)
+    if not write_contract and any(b.get('patched_sha256') == base_hash for b in contract['bases'].values()):
+        raise ValueError(f'{base} is already a Direct AI Connect build, not the original Mantella.exe. Point to the '
+                         'Mantella.exe inside the Mantella mod itself (with Vortex: in its staging folder, not in Data). '
+                         'Nothing changed.')
     if not write_contract and base_hash not in contract['bases']:
         raise ValueError('Unsupported Mantella executable. Supported: Mantella 0.14 (the Mantella.exe from the Mantella mod itself). Nothing changed.')
 
@@ -180,8 +184,20 @@ def build(base, output, root=ROOT, write_contract=False):
     elif sha256(data) != contract['bases'][base_hash]['patched_sha256']:
         raise ValueError('Built executable does not match the verified release. Nothing changed.')
 
-    output.parent.mkdir(parents=True, exist_ok=True)
+    install(data, output)
+    report['base_name'] = contract['bases'][base_hash]['name']
+    return report
+
+
+IN_USE_HINT = ('Mantella.exe is in use: close Mantella (its window or the game started through it) and Skyrim, then '
+               'run Setup Backend.cmd again. Nothing changed.')
+
+
+def install(data, output):
+    """Writes the built exe through a temporary file next to it and checks it on disk."""
     import os, tempfile
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix='.mant-', suffix='.tmp', dir=output.parent)
     try:
         with os.fdopen(fd, 'wb') as stream:
@@ -189,25 +205,43 @@ def build(base, output, root=ROOT, write_contract=False):
         Path(temporary).replace(output)
     except FileNotFoundError:
         raise ValueError(f'The new Mantella.exe disappeared while it was being written to {output}. ' + ANTIVIRUS_HINT)
+    except PermissionError:
+        # Windows refuses to replace a running exe ([WinError 5] access denied, or 32 in use by another process)
+        raise ValueError(IN_USE_HINT)
     finally:
         Path(temporary).unlink(missing_ok=True)
     check_written(output, data)
-    report['base_name'] = contract['bases'][base_hash]['name']
-    return report
+
+
+EXE = 'SKSE/Plugins/MantellaSoftware/Mantella.exe'
+
+
+def base_candidates(root=ROOT):
+    """Where stock Mantella's Mantella.exe can be: the sibling mod folders (Mod Organizer 2, or Vortex when setup runs
+    from its staging folder), then Vortex's default staging folders."""
+    import os
+    yield from Path(root).parent.glob('*/' + EXE)
+    appdata = os.environ.get('APPDATA')
+    if appdata:
+        for game in ('skyrimse', 'skyrimvr'):
+            yield from (Path(appdata) / 'Vortex' / game / 'mods').glob('*/' + EXE)
 
 
 def find_base(root=ROOT):
-    """Picks stock Mantella's Mantella.exe from the sibling MO2 mod folders."""
+    """Picks stock Mantella's Mantella.exe from the places base_candidates lists."""
     sys.path.insert(0, str(root / 'Source/backend'))
     from frozen_patch import sha256
     bases = json.loads(CONTRACT.read_text(encoding='utf-8'))['bases']
     found = {}
-    for candidate in root.parent.glob('*/SKSE/Plugins/MantellaSoftware/Mantella.exe'):
+    for candidate in base_candidates(root):
         if candidate.resolve() == OUTPUT.resolve():
             continue
-        digest = sha256(candidate.read_bytes())
+        try:
+            digest = sha256(candidate.read_bytes())
+        except OSError:
+            continue  # a locked or unreadable copy is not the one to patch
         if digest in bases:
-            found[bases[digest]['name']] = candidate
+            found.setdefault(bases[digest]['name'], candidate)  # the first place listed wins
     return found.get('Mantella 0.14')
 
 
