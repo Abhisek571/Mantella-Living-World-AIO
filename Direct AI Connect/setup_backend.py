@@ -14,6 +14,7 @@ MODULES = {
     'src.utils': 'src/utils.py',
     'src.llm.client_base': 'src/llm/client_base.py',
     'src.config.definitions.llm_definitions': 'src/config/definitions/llm_definitions.py',
+    'src.config.mantella_config_value_definitions_new': 'src/config/mantella_config_value_definitions_new.py',
     'src.config.definitions.vision_definitions': 'src/config/definitions/vision_definitions.py',
     'src.config.definitions.action_definitions': 'src/config/definitions/action_definitions.py',
     'src.http.routes.mantella_route': 'src/http/routes/mantella_route.py',
@@ -210,6 +211,48 @@ def find_base(root=ROOT):
     return found.get('Mantella 0.14')
 
 
+FLOWS_TOOL = Path('tools/Mantella Living World - OStim Expansion/flowgen.py')
+FLOWS_TIMEOUT = 600  # seconds; a normal build takes well under a minute
+
+
+def find_flowgen(root=ROOT):
+    """Mantella Living World - OStim Expansion's flow builder: in this mod (All in One) or in a sibling mod folder."""
+    root = Path(root)
+    if (root / FLOWS_TOOL).is_file():
+        return root / FLOWS_TOOL
+    return next(iter(sorted(root.parent.glob('*/' + FLOWS_TOOL.as_posix()))), None)
+
+
+def build_flows(root=ROOT, timeout=FLOWS_TIMEOUT):
+    """Builds the OStim flows when OStim Expansion is installed. Says nothing when it is not.
+    Returns True (built), False (failed) or None (not installed). Never stops the setup."""
+    import subprocess
+    flowgen = find_flowgen(root)
+    if flowgen is None:
+        return None
+    print()
+    print('Building OStim flows...', flush=True)
+    sys.stderr.flush()
+    # a question from the flow builder (where Mod Organizer 2 is) can be answered in this window; with no
+    # window to answer in, it gets no input and stops with its own message instead of waiting forever
+    stdin = None if sys.stdin is not None and sys.stdin.isatty() else subprocess.DEVNULL
+    problem = None
+    try:
+        result = subprocess.run([sys.executable, str(flowgen), '--auto'], stdin=stdin, timeout=timeout)
+        if result.returncode != 0:
+            problem = 'see the message above'
+    except subprocess.TimeoutExpired:
+        took = f'{timeout // 60} minutes' if timeout >= 60 else f'{timeout} seconds'
+        problem = f'it took longer than {took} and was stopped'
+    except OSError as error:
+        problem = str(error)
+    if problem:
+        print(f'Warning: the OStim flows were not built ({problem}). The backend is built and ready. '
+              f'Run Build Flows.cmd in {flowgen.parent} later.', flush=True)
+        return False
+    return True
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
@@ -229,6 +272,7 @@ def main():
     print('In MO2\'s left pane, place this mod AFTER (below) Mantella, so its Mantella.exe and scripts win.')
     print('Dual Input is included: turn off the separate Mantella Dual Input mod if you have it.')
     print('Your original files and settings were not changed.')
+    build_flows()
 
 
 if __name__ == '__main__':

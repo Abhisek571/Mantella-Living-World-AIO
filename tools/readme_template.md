@@ -39,8 +39,8 @@ Built and tested on Skyrim Special Edition with Mod Organizer 2.
 2. Install this archive as one mod and pick the modules you want.
 3. In MO2's left pane, place it below Mantella. With OStim Expansion, also place it below Actions For Mantella - Expanded Sex Actions.
 4. Enable the mod and the Living World plugins it adds.
-5. Right-click the mod, Open in Explorer, and run Setup Backend.cmd once. It finds Mantella 0.14's own Mantella.exe in your other mods and builds the patched copy here.
-6. With OStim Expansion: close the game and run tools\Mantella Living World - OStim Expansion\Build Flows.cmd from the same folder, then enable the new mod "Mantella Living World - OStim Expansion - Flows". Run it again whenever you add or remove animation packs.
+5. Right-click the mod, Open in Explorer, and run Setup Backend.cmd once. It finds Mantella 0.14's own Mantella.exe in your other mods and builds the patched copy here. With OStim Expansion it then builds the OStim flows too.
+6. With OStim Expansion: enable the new mod "Mantella Living World - OStim Expansion - Flows". Whenever you add or remove animation packs, close the game and run tools\Mantella Living World - OStim Expansion\Build Flows.cmd from the same folder.
 7. In game, run the setup when the reminder box asks, or press the Living World hotkey (Home) while aiming at nobody. Save afterwards.
 8. Open Mantella's settings page (http://localhost:4999/ui while Mantella is running), turn on Advanced Actions in the Actions tab, and check the Living World tab's Status page. It lists anything that is missing.
 
@@ -56,7 +56,7 @@ Reinstall this archive over the same mod and change the ticks. Removing the Inte
 
 ## After an update
 
-Run Setup Backend.cmd again, and Build Flows.cmd if you use OStim Expansion.
+Run Setup Backend.cmd again. With OStim Expansion it rebuilds the flows too.
 
 ## Documentation
 
