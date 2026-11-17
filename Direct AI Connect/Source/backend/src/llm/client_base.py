@@ -51,6 +51,44 @@ def only_offered(tool_calls: list, tools: list | None) -> list:
     return kept
 
 
+GROUP_MIN_TOKENS = 250
+
+
+def _limit_value(value) -> int | None:
+    return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
+def token_limit(request_params: dict | None) -> int:
+    """The reply limit the player set, by either name (max_tokens, or OpenAI's max_completion_tokens, or max_tokens
+    in extra_body), else 250."""
+    params = request_params or {}
+    extra = params.get('extra_body') if isinstance(params.get('extra_body'), dict) else {}
+    for value in (params.get('max_tokens'), params.get('max_completion_tokens'), extra.get('max_tokens')):
+        if _limit_value(value) is not None:
+            return _limit_value(value)
+    return GROUP_MIN_TOKENS
+
+
+def group_max_tokens(request_params: dict) -> dict:
+    """Radiant and multi-NPC talks get at least GROUP_MIN_TOKENS, written into every limit the player set (so a higher
+    limit is never replaced by a second, lower max_tokens, and a low one under another name never wins); none set:
+    max_tokens. extra_body is copied before it changes, as request_params is a shallow copy of the settings."""
+    set_any = False
+    for key in ('max_tokens', 'max_completion_tokens'):
+        if key in request_params:
+            set_any = True
+            if _limit_value(request_params[key]) is not None:
+                request_params[key] = max(_limit_value(request_params[key]), GROUP_MIN_TOKENS)
+    extra = request_params.get('extra_body')
+    if isinstance(extra, dict) and 'max_tokens' in extra:
+        set_any = True
+        if _limit_value(extra['max_tokens']) is not None:
+            request_params['extra_body'] = dict(extra, max_tokens=max(_limit_value(extra['max_tokens']), GROUP_MIN_TOKENS))
+    if not set_any:
+        request_params['max_tokens'] = GROUP_MIN_TOKENS
+    return request_params
+
+
 class NoToolUse(list):
     """The actions of a reply that must not call one (the answer after an action's result). Anthropic (Native) still
     sends them, with tool_choice none, so the cached prefix stays the same as on the other replies; every other
@@ -207,7 +245,7 @@ class ClientBase(AIClient):
     @property
     def max_tokens_param(self) -> int:
         """Returns the max_tokens value from request params, or defaults to 250"""
-        return self._request_params.get("max_tokens", 250) if self._request_params else 250
+        return token_limit(self._request_params)
 
 
     @utils.time_it
@@ -596,8 +634,8 @@ class ClientBase(AIClient):
             request_params = self._request_params.copy() # copy of self._request_params to allow temporary override
         else:
             request_params: dict[str, Any] = {}
-        if is_multi_npc: # override max_tokens to be at least 250 in radiant / multi-NPC conversations
-            request_params["max_tokens"] = max(self.max_tokens_param, 250)
+        if is_multi_npc: # at least 250 tokens in radiant / multi-NPC conversations
+            group_max_tokens(request_params)
         if tools:
             request_params["tools"] = tools
 
