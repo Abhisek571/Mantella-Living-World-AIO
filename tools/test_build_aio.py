@@ -60,6 +60,13 @@ with tempfile.TemporaryDirectory() as tmp:
     put(staged, 'SKSE/Plugins/MantellaSoftware/data/actions/new_action.json', b'{}')
     check('a release built from the current source: nothing reported', B.stale_files('knowledge', staged, repo) == [],
           B.stale_files('knowledge', staged, repo))
+    put(repo, 'MCM/Config/Mod/config.json', b'{"a": 1}')  # the Hub ships its MCM folder whole
+    put(staged, 'MCM/Config/Mod/config.json', b'{"a": 1}')
+    check('an MCM file shipped as in the source: nothing reported', B.stale_files('knowledge', staged, repo) == [],
+          B.stale_files('knowledge', staged, repo))
+    put(staged, 'MCM/Config/Mod/config.json', b'{"a": 0}')
+    check('an older MCM file is stale', dict(B.stale_files('knowledge', staged, repo)).get('MCM/Config/Mod/config.json') == 'differs from the source')
+    put(staged, 'MCM/Config/Mod/config.json', b'{"a": 1}')
 
     mirror = os.path.join(tmp, 'mirror')
     put(mirror, 'Source/Scripts/A.psc', b'Scriptname A\r\nint x\r\n')

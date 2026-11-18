@@ -114,7 +114,7 @@ def source_of(key, rel):
         return f'server/{name}/{rest}'
     if re.fullmatch(r'SKSE/Plugins/[^/]+\.dll', rel):
         return 'plugin/build/release/' + rel.rsplit('/', 1)[1]
-    if rel.startswith('SKSE/'):
+    if rel.startswith(('SKSE/', 'MCM/')):  # data folders the build copies whole
         return rel
     if rel.startswith('tools/'):
         return 'tools/' + rel.rsplit('/', 1)[1]
